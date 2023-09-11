@@ -15,6 +15,7 @@ ModTDRStyle()
 xPadRange = [0.0,1.0]
 yPadRange = [0.0,0.30-padGap, 0.30+padGap,1.0]
 
+os.system("rm -r %s"%outPlotDir)
 os.system("mkdir -p %s"%outPlotDir)
 
 def makeEff(num, den):
@@ -81,11 +82,8 @@ def makeEff(num, den):
         #baseLine.Draw()
         for index_, two in enumerate(forRatio):
             files = {}
-            for dirSamp in two:
-                dirH = dirSamp.split("/")[0]
-                samp = dirSamp.split("/")[1]
-                inFile = TFile.Open("/eos/uscms/%s/%s/merged/%s_Hist.root"%(eosDir, dirH, samp))
-                files["%s__%s"%(dirH, samp)] = inFile
+            files[two[0]] = forOverlay[two[0]]
+            files[two[1]] = forOverlay[two[1]]
             hRatio = getRatio(files, num, den)
             decoHistRatio(hRatio, xTitle, "Ratio", index_+1)
             hRatio.GetYaxis().SetRangeUser(0.7, 1.3)
@@ -96,10 +94,11 @@ def makeEff(num, den):
                 hRatio.Draw("Psame")
             rLeg.AddEntry(hRatio, "%s"%(hRatio.GetName()), "L")
         #rLeg.Draw()
-    pdf = "%s/effPlot_%s.pdf"%(outPlotDir, num)
+    #pdf = "%s/effPlot_%s.pdf"%(outPlotDir, num)
+    pdf = "./plots/effPlot_%s.pdf"%(num)
     png = pdf.replace("pdf", "png")
-    canvas.SaveAs(pdf)
-    #canvas.SaveAs(png)
+    #canvas.SaveAs(pdf)
+    canvas.SaveAs(png)
 
 
 for num in numPtEE:

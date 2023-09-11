@@ -80,6 +80,14 @@ def match_to_gen(eta,phi,genparts,pid=11,antipart=True,max_dr=0.1,status=1):
     return best_match,best_dr2,best_pt
 
 
+def getFilters(cmsPath):
+    filts = []
+    for fil in cmsPath.split(",")[0].split("+"):
+        if "Filter" in fil:
+            filts.append(fil.replace("process.", ""))
+    return filts
+
+
 if __name__ == "__main__":
 
     oldargv = sys.argv[:]
@@ -95,6 +103,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+
+
+    #ele_handle, ele_label = Handle("std::vector<trigger::EgammaObject>"), "hltEgammaHLTExtra"
     ele_handle, ele_label = Handle("std::vector<trigger::EgammaObject>"), "hltEgammaHLTExtra:Unseeded"
     hlt_handle, hlt_label = Handle("edm::TriggerResults"), "TriggerResults::HLTX"
     hltevt_handle, hltevt_label = Handle("trigger::TriggerEvent"), "hltTriggerSummaryAOD::HLTX"
@@ -110,83 +121,41 @@ if __name__ == "__main__":
 
     events = Events(new_list)
 
-    den_ele_eta_ele32 = ROOT.TH1D("den_ele_eta",";#eta;nEntries",40,-4,4)
-    den_ele_pt_EB = ROOT.TH1D("den_ele_pt_EB",";pT;nEntries",100,0,500)
-    den_ele_pt_EE = ROOT.TH1D("den_ele_pt_EE",";pT;nEntries",100,0,500)
+    #process.HLT_Ele32_WPTight_Unseeded = cms.Path(process.HLTBeginSequence+process.hltPreEle32WPTightUnseeded+process.HLTEle32WPTightUnseededSequence+process.HLTEndSequence)
+    HLTEle32WPTightUnseededSequence = "cms.Sequence(process.HLTL1Sequence+process.hltEGL1SeedsForSingleEleIsolatedFilter+process.HLTDoFullUnpackingEgammaEcalSequence+process.HLTPFClusteringForEgammaUnseeded+process.HLTHgcalTiclPFClusteringForEgammaUnseeded+process.hltEgammaCandidatesWrapperUnseeded+process.hltEG32EtUnseededFilter+process.hltEle32WPTightClusterShapeUnseededFilter+process.hltEle32WPTightClusterShapeSigmavvUnseededFilter+process.hltEle32WPTightClusterShapeSigmawwUnseededFilter+process.hltEle32WPTightHgcalHEUnseededFilter+process.HLTDoLocalHcalSequence+process.HLTFastJetForEgamma+process.hltEle32WPTightHEUnseededFilter+process.hltEle32WPTightEcalIsoUnseededFilter+process.hltEle32WPTightHgcalIsoUnseededFilter+process.HLTPFHcalClusteringForEgamma+process.hltEle32WPTightHcalIsoUnseededFilter+process.HLTElePixelMatchUnseededSequence+process.hltEle32WPTightPixelMatchUnseededFilter+process.hltEle32WPTightPMS2UnseededFilter+process.HLTGsfElectronUnseededSequence+process.hltEle32WPTightGsfOneOEMinusOneOPUnseededFilter+process.hltEle32WPTightGsfDetaUnseededFilter+process.hltEle32WPTightGsfDphiUnseededFilter+process.hltEle32WPTightBestGsfNLayerITUnseededFilter+process.hltEle32WPTightBestGsfChi2UnseededFilter+process.hltEle32WPTightGsfTrackIsoFromL1TracksUnseededFilter+process.HLTTrackingV61Sequence+process.hltEle32WPTightGsfTrackIsoUnseededFilter, process.HLTEle32WPTightUnseededTask)"
+    #HLTEle32WPTightL1SeededSequence = "cms.Sequence(process.HLTL1Sequence+process.hltEGL1SeedsForSingleEleIsolatedFilter+process.HLTDoFullUnpackingEgammaEcalL1SeededSequence+process.HLTPFClusteringForEgammaL1Seeded+process.HLTHgcalTiclPFClusteringForEgammaL1Seeded+process.hltEgammaCandidatesWrapperL1Seeded+process.hltEG32EtL1SeededFilter+process.hltEle32WPTightClusterShapeL1SeededFilter+process.hltEle32WPTightClusterShapeSigmavvL1SeededFilter+process.hltEle32WPTightClusterShapeSigmawwL1SeededFilter+process.hltEle32WPTightHgcalHEL1SeededFilter+process.HLTDoLocalHcalSequence+process.HLTFastJetForEgamma+process.hltEle32WPTightHEL1SeededFilter+process.hltEle32WPTightEcalIsoL1SeededFilter+process.hltEle32WPTightHgcalIsoL1SeededFilter+process.HLTPFHcalClusteringForEgamma+process.hltEle32WPTightHcalIsoL1SeededFilter+process.HLTElePixelMatchL1SeededSequence+process.hltEle32WPTightPixelMatchL1SeededFilter+process.hltEle32WPTightPMS2L1SeededFilter+process.HLTGsfElectronL1SeededSequence+process.hltEle32WPTightGsfOneOEMinusOneOPL1SeededFilter+process.hltEle32WPTightGsfDetaL1SeededFilter+process.hltEle32WPTightGsfDphiL1SeededFilter+process.hltEle32WPTightBestGsfNLayerITL1SeededFilter+process.hltEle32WPTightBestGsfChi2L1SeededFilter+process.hltEle32WPTightGsfTrackIsoFromL1TracksL1SeededFilter+process.HLTTrackingV61Sequence+process.hltEle32WPTightGsfTrackIsoL1SeededFilter, process.HLTEle32WPTightL1SeededTaski)"
+    filt32 = getFilters(HLTEle32WPTightUnseededSequence)
+    #filt32 = getFilters(HLTEle32WPTightL1SeededSequence)
+    filt32.append("l1tTkEmSingle51Filter")
+    filt32.append("l1tTkEleSingle36Filter")
+    filt32.append("l1tTkIsoEleSingle28Filter")
+    #filt32 = ['hltEG32EtUnseededFilter']
+    print(filt32)
+    ptBins  = array('d', [5,10,15,20,22,26,28,30,32,34,36,38,40,45,50,60,80,100,150,250,500])
+    #ptBins  = array('d', [5,10,15,20,22,26,28,30,32,34,36,38,40,45,50,60,80,100,150,250,500])
+    etaBins = array('d', [-2.5,-2.4,-2.3,-2.2,-2.1,-2.0,-1.9,-1.8,-1.7,-1.56,-1.44,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.44,1.56,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5])
+    den_ele_eta_ele32   = ROOT.TH1D("den_ele_eta", "#eta",len(etaBins)-1, etaBins)
+    den_ele_pt_EB       = ROOT.TH1D("den_ele_pt_EB","pT", len(ptBins)-1,  ptBins)
+    den_ele_pt_EE       = ROOT.TH1D("den_ele_pt_EE","pT", len(ptBins)-1,  ptBins)
 
-    num_ele_eta_hltEle32WPTightGsfTrackIsoFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfTrackIsoFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EE",";pT;nEntries",100,0,500)
+    for f32 in filt32:
+        #declare histograms
+        exec('num_ele_eta_%s     = ROOT.TH1D("num_ele_eta_%s",   "#eta", %s, %s)'%(f32, f32, len(etaBins)-1, etaBins))
+        exec('num_ele_pt_%s_EB   = ROOT.TH1D("num_ele_pt_%s_EB", "pT",   %s, %s)'%(f32, f32, len(ptBins)-1,  ptBins))
+        exec('num_ele_pt_%s_EE   = ROOT.TH1D("num_ele_pt_%s_EE", "pT",   %s, %s)'%(f32, f32, len(ptBins)-1,  ptBins))
 
-    num_ele_eta_hltEle32WPTightGsfTrackIsoL1SeededFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfTrackIsoL1SeededFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEGL1SingleEGOrFilter = ROOT.TH1D("num_ele_eta_hltEGL1SingleEGOrFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEGL1SingleEGOrFilter_EB = ROOT.TH1D("num_ele_pt_hltEGL1SingleEGOrFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEGL1SingleEGOrFilter_EE = ROOT.TH1D("num_ele_pt_hltEGL1SingleEGOrFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightClusterShapeFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightClusterShapeFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightClusterShapeFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightClusterShapeFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightClusterShapeFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightClusterShapeFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightHEFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightHEFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightHEFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightHEFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightHEFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightHEFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightEcalIsoFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightEcalIsoFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightEcalIsoFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightEcalIsoFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightEcalIsoFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightEcalIsoFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightHcalIsoFilter = ROOT.TH1D("num_ele_eta_hltEle32WPTightHcalIsoFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightHcalIsoFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightHcalIsoFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightHcalIsoFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightHcalIsoFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightPixelMatchFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightPixelMatchFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightPixelMatchFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightPixelMatchFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightPixelMatchFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightPixelMatchFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightPMS2Filter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightPMS2Filter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightPMS2Filter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightPMS2Filter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightPMS2Filter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightPMS2Filter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightGsfOneOEMinusOneOPFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfOneOEMinusOneOPFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightGsfDetaFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfDetaFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfDetaFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfDetaFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfDetaFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfDetaFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightGsfDphiFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfDphiFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfDphiFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfDphiFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfDphiFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfDphiFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightBestGsfNLayerITFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightBestGsfNLayerITFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightBestGsfChi2Filter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightBestGsfChi2Filter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EE",";pT;nEntries",100,0,500)
-
-    num_ele_eta_hltEle32WPTightGsfTrackIsoFromL1TracksFilter  = ROOT.TH1D("num_ele_eta_hltEle32WPTightGsfTrackIsoFromL1TracksFilter",";#eta;nEntries",40,-4,4)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EB = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EB",";pT;nEntries",100,0,500)
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EE = ROOT.TH1D("num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EE",";pT;nEntries",100,0,500)
-
-    hcalclusIsolation = ROOT.TH1D("hcalclusIsolation", ";hcalclusIsolation;nEntries",300,0,300)
-
+    percent_step = 1
     start_time = time.time() 
-   
+    total_entries = events.size()  
     for event_nr,event in enumerate(events):
-
-        if event_nr%100==0:
+        current_percent = (event_nr + 1) / total_entries * 100
+        if current_percent % percent_step == 0:
            elapsed_time = time.time()-start_time
            est_finish = "n/a"
            if event_nr!=0 or elapsed_time==0:
                 remaining = float(events.size()-event_nr)/event_nr*elapsed_time 
                 est_finish = time.ctime(remaining+start_time+elapsed_time)
-                print("{} / {} time: {:.1f}s, est finish {}".format(event_nr,events.size(),elapsed_time,est_finish))
+                print("{} / {} time: {:.1f}s, est finish {}".format(event_nr+1,events.size(),elapsed_time,est_finish))
 
         event.getByLabel(ele_label,ele_handle)
         event.getByLabel(hlt_label,hlt_handle)
@@ -199,241 +168,40 @@ if __name__ == "__main__":
         genobjs=gen_handle.product()
 
         trigdict=event.object().triggerNames(hlts).triggerNames()
-
-        eg_trig_objs_hltEGL1SingleEGOrFilter = getListFilterPassedObj("hltEGL1SeedsForSingleEleIsolatedFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfTrackIsoFilter = getListFilterPassedObj("hltEle32WPTightGsfTrackIsoUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfTrackIsoL1SeededFilter = getListFilterPassedObj("hltEle32WPTightGsfTrackIsoL1SeededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightClusterShapeFilter = getListFilterPassedObj("hltEle32WPTightClusterShapeUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightHEFilter = getListFilterPassedObj("hltEle32WPTightHEUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightEcalIsoFilter = getListFilterPassedObj("hltEle32WPTightEcalIsoUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightHcalIsoFilter = getListFilterPassedObj("hltEle32WPTightHcalIsoUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightPixelMatchFilter  = getListFilterPassedObj("hltEle32WPTightPixelMatchUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightPMS2Filter  = getListFilterPassedObj("hltEle32WPTightPMS2UnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfOneOEMinusOneOPFilter  = getListFilterPassedObj("hltEle32WPTightGsfOneOEMinusOneOPUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfDetaFilter  = getListFilterPassedObj("hltEle32WPTightGsfDetaUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfDphiFilter  = getListFilterPassedObj("hltEle32WPTightGsfDphiUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightBestGsfNLayerITFilter  = getListFilterPassedObj("hltEle32WPTightBestGsfNLayerITUnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightBestGsfChi2Filter  = getListFilterPassedObj("hltEle32WPTightBestGsfChi2UnseededFilter",hltsevt)
-        eg_trig_objs_hltEle32WPTightGsfTrackIsoFromL1TracksFilter  = getListFilterPassedObj("hltEle32WPTightGsfTrackIsoFromL1TracksUnseededFilter",hltsevt)
-
+        #Get trigger objects
+        for f32 in filt32:
+            exec('eg_trig_objs_%s= getListFilterPassedObj("%s",hltsevt)'%(f32, f32))
+        #Loop over egamma candiates
         for eg in eles:
-          #print ("in the ele loop.. found ele, pt = ", eg.pt() )      
-
-          #check if the electron matches with any trigger object that passed a given filter 
-          matched_objs_hltEle32WPTightGsfTrackIsoFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfTrackIsoFilter)
-          nmatch_hltEle32WPTightGsfTrackIsoFilter = len(matched_objs_hltEle32WPTightGsfTrackIsoFilter)
-          matched_objs_hltEle32WPTightGsfTrackIsoL1SeededFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfTrackIsoL1SeededFilter)
-          nmatch_hltEle32WPTightGsfTrackIsoL1SeededFilter = len(matched_objs_hltEle32WPTightGsfTrackIsoL1SeededFilter)
-
-          matched_objs_hltEGL1SingleEGOrFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEGL1SingleEGOrFilter)
-          nmatch_hltEGL1SingleEGOrFilter = len(matched_objs_hltEGL1SingleEGOrFilter)
-
-          matched_objs_hltEle32WPTightClusterShapeFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightClusterShapeFilter)
-          nmatch_hltEle32WPTightClusterShapeFilter = len(matched_objs_hltEle32WPTightClusterShapeFilter)
-
-          matched_objs_hltEle32WPTightHEFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightHEFilter)
-          nmatch_hltEle32WPTightHEFilter = len(matched_objs_hltEle32WPTightHEFilter)
-
-          matched_objs_hltEle32WPTightEcalIsoFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightEcalIsoFilter)
-          nmatch_hltEle32WPTightEcalIsoFilter = len(matched_objs_hltEle32WPTightEcalIsoFilter)
-
-          matched_objs_hltEle32WPTightHcalIsoFilter = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightHcalIsoFilter)
-          nmatch_hltEle32WPTightHcalIsoFilter = len(matched_objs_hltEle32WPTightHcalIsoFilter)
-
-          matched_objs_hltEle32WPTightPixelMatchFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightPixelMatchFilter )
-          nmatch_hltEle32WPTightPixelMatchFilter  = len(matched_objs_hltEle32WPTightPixelMatchFilter)
-
-          matched_objs_hltEle32WPTightPMS2Filter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightPMS2Filter )
-          nmatch_hltEle32WPTightPMS2Filter  = len(matched_objs_hltEle32WPTightPMS2Filter)
-
-          matched_objs_hltEle32WPTightGsfOneOEMinusOneOPFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfOneOEMinusOneOPFilter )
-          nmatch_hltEle32WPTightGsfOneOEMinusOneOPFilter  = len(matched_objs_hltEle32WPTightGsfOneOEMinusOneOPFilter)
-
-          matched_objs_hltEle32WPTightGsfDetaFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfDetaFilter )
-          nmatch_hltEle32WPTightGsfDetaFilter  = len(matched_objs_hltEle32WPTightGsfDetaFilter)
-
-          matched_objs_hltEle32WPTightGsfDphiFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfDphiFilter )
-          nmatch_hltEle32WPTightGsfDphiFilter  = len(matched_objs_hltEle32WPTightGsfDphiFilter)
-
-          matched_objs_hltEle32WPTightBestGsfNLayerITFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightBestGsfNLayerITFilter )
-          nmatch_hltEle32WPTightBestGsfNLayerITFilter  = len(matched_objs_hltEle32WPTightBestGsfNLayerITFilter)
-
-          matched_objs_hltEle32WPTightBestGsfChi2Filter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightBestGsfChi2Filter )
-          nmatch_hltEle32WPTightBestGsfChi2Filter  = len(matched_objs_hltEle32WPTightBestGsfChi2Filter)
-
-          matched_objs_hltEle32WPTightGsfTrackIsoFromL1TracksFilter  = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_hltEle32WPTightGsfTrackIsoFromL1TracksFilter )
-          nmatch_hltEle32WPTightGsfTrackIsoFromL1TracksFilter  = len(matched_objs_hltEle32WPTightGsfTrackIsoFromL1TracksFilter)
-          
-          gen_match_ele = match_to_gen(eg.eta(),eg.phi(),gen_handle.product(),pid=11)[0]
-          gen_pt = match_to_gen(eg.eta(),eg.phi(),gen_handle.product(),pid=11)[2]
-          if (gen_match_ele):
-
-                  if (eg.pt()>=40.0 and (abs(eg.eta()) < 1.44) ):
-                          hcalclusIsolation.Fill(eg.var("hltEgammaHcalPFClusterIsoUnseeded"))
-
-                  #print ("this ele is gen matched")
-                  ## Fill denominators
-                  if (abs(eg.eta()) < 1.44 ): den_ele_pt_EB.Fill(gen_pt)
-                  if ( (abs(eg.eta())>1.56) and (abs(eg.eta())<2.4) ): den_ele_pt_EE.Fill(gen_pt)
-                  if (eg.pt()>=40.0 and eg.pt()<500.0): 
-                          den_ele_eta_ele32.Fill(eg.eta())
-
-                  ## Fill numerators
-                  if (nmatch_hltEle32WPTightClusterShapeFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightClusterShapeFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightClusterShapeFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightClusterShapeFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightHEFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightHEFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightHEFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightHEFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightEcalIsoFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightEcalIsoFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightEcalIsoFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightEcalIsoFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightHcalIsoFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightHcalIsoFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightHcalIsoFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightHcalIsoFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightPixelMatchFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightPixelMatchFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightPixelMatchFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightPixelMatchFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightPMS2Filter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightPMS2Filter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightPMS2Filter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightPMS2Filter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightGsfOneOEMinusOneOPFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfOneOEMinusOneOPFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightGsfDetaFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfDetaFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfDetaFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfDetaFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightGsfDphiFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfDphiFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfDphiFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfDphiFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightBestGsfNLayerITFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightBestGsfNLayerITFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightBestGsfChi2Filter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightBestGsfChi2Filter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightGsfTrackIsoFromL1TracksFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfTrackIsoFromL1TracksFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEle32WPTightGsfTrackIsoFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfTrackIsoFilter.Fill(eg.eta())
-                  if (nmatch_hltEle32WPTightGsfTrackIsoL1SeededFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500): 
-                        num_ele_eta_hltEle32WPTightGsfTrackIsoL1SeededFilter.Fill(eg.eta())
-
-                  if (nmatch_hltEGL1SingleEGOrFilter>0) :
-                      if (abs(eg.eta()) < 1.44 ): num_ele_pt_hltEGL1SingleEGOrFilter_EB.Fill(gen_pt)
-                      if ( (abs(eg.eta()) > 1.56 ) and (abs(eg.eta())<2.4)): num_ele_pt_hltEGL1SingleEGOrFilter_EE.Fill(gen_pt)
-                      if (eg.pt()>=40.0 and eg.pt()<500.0): 
-                        num_ele_eta_hltEGL1SingleEGOrFilter.Fill(eg.eta())
-
-
+            gen_match_ele = match_to_gen(eg.eta(),eg.phi(),gen_handle.product(),pid=11)[0]
+            gen_pt = match_to_gen(eg.eta(),eg.phi(),gen_handle.product(),pid=11)[2]
+            if (gen_match_ele):
+                if (abs(eg.eta()) > 1.44 and abs(eg.eta()) < 1.56): continue 
+                if (gen_pt<30.0): continue
+                for ind, f32 in enumerate(filt32):
+                    exec('matched_objs_%s = match_trig_objs(eg.eta(),eg.phi(),eg_trig_objs_%s)'%(f32, f32))
+                    nMatched = eval('len(matched_objs_%s)'%f32)
+                    if (abs(eg.eta()) <= 1.44): 
+                        if ind==0: 
+                            den_ele_pt_EB.Fill(gen_pt)
+                        if nMatched> 0:
+                            exec('num_ele_pt_%s_EB.Fill(%s)'%(f32, gen_pt))
+                    if (abs(eg.eta())>=1.56): 
+                        if ind==0:
+                            den_ele_pt_EE.Fill(gen_pt)
+                        if nMatched> 0:
+                            exec('num_ele_pt_%s_EE.Fill(%s)'%(f32, gen_pt))
+                    if ind==0:
+                        den_ele_eta_ele32.Fill(eg.eta())
+                    if nMatched> 0:
+                        exec('num_ele_eta_%s.Fill(%s)'%(f32, eg.eta()))
+                    
     output_file = TFile( args.output, 'recreate' )
-
     den_ele_eta_ele32.Write()
     den_ele_pt_EB.Write()
     den_ele_pt_EE.Write()
-
-    num_ele_eta_hltEle32WPTightGsfTrackIsoFilter.Write()
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFilter_EE.Write()
-
-    num_ele_eta_hltEle32WPTightGsfTrackIsoL1SeededFilter.Write()
-    num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfTrackIsoL1SeededFilter_EE.Write()
-    num_ele_eta_hltEGL1SingleEGOrFilter.Write()
-    num_ele_pt_hltEGL1SingleEGOrFilter_EB.Write()
-    num_ele_pt_hltEGL1SingleEGOrFilter_EE.Write()
-
-    num_ele_pt_hltEle32WPTightClusterShapeFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightClusterShapeFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightClusterShapeFilter.Write()
-
-    num_ele_pt_hltEle32WPTightHEFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightHEFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightHEFilter.Write()
-
-    num_ele_pt_hltEle32WPTightEcalIsoFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightEcalIsoFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightEcalIsoFilter.Write()
-
-    num_ele_pt_hltEle32WPTightHcalIsoFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightHcalIsoFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightHcalIsoFilter.Write()
-
-    num_ele_pt_hltEle32WPTightPixelMatchFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightPixelMatchFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightPixelMatchFilter.Write()
-
-    num_ele_pt_hltEle32WPTightPMS2Filter_EB.Write()
-    num_ele_pt_hltEle32WPTightPMS2Filter_EE.Write()
-    num_ele_eta_hltEle32WPTightPMS2Filter.Write()
-
-    num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfOneOEMinusOneOPFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightGsfOneOEMinusOneOPFilter.Write()
-
-    num_ele_pt_hltEle32WPTightGsfDetaFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfDetaFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightGsfDetaFilter.Write()
-
-    num_ele_pt_hltEle32WPTightGsfDphiFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfDphiFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightGsfDphiFilter.Write()
-
-    num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightBestGsfNLayerITFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightBestGsfNLayerITFilter.Write()
-
-    num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EB.Write()
-    num_ele_pt_hltEle32WPTightBestGsfChi2Filter_EE.Write()
-    num_ele_eta_hltEle32WPTightBestGsfChi2Filter.Write()
-
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EB.Write()
-    num_ele_pt_hltEle32WPTightGsfTrackIsoFromL1TracksFilter_EE.Write()
-    num_ele_eta_hltEle32WPTightGsfTrackIsoFromL1TracksFilter.Write()
-
-    hcalclusIsolation.Write()
-
+    for f32 in filt32:
+        exec('num_ele_eta_%s.Write()'%f32)
+        exec('num_ele_pt_%s_EB.Write()'%f32)
+        exec('num_ele_pt_%s_EE.Write()'%f32)
     output_file.Close()
