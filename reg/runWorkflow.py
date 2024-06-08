@@ -26,7 +26,7 @@ s5Reg = options.s5Reg
 s6Plot = options.s6Plot
 s7NewGT = options.s7NewGT
 
-eosDir = "/store/group/phys_egamma/ec/rverma/egammaRegChain"
+eosDir = "/store/group/phys_egamma/ec/rverma/egammaRegChain_01Feb"
 #----------------------------------------
 # Steo-1: Get HLT Configuration file
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/EGMHLTRun3RecommendationForPAG

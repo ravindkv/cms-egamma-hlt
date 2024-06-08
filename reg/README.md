@@ -1,15 +1,11 @@
 # cms-egamma-reg
 EGamma offline energy regression
 
-* source setWorkflow.sh
+#For Run 3 (2023)
+* cmsrel CMSSW_13_0_0
+* cd CMSSW_13_0_0/src
+* cmsenv
+* git cms-init
+* git cms-merge-topic Sam-Harper:EGHLTCustomisation_1230pre6 
+* scram b -j 4
 
-### Change pid to 11 or 22 according to the input data in 
-Analysis/HLTAnalyserPy/python/EgHLTRun3Tree.py, L-198
-
-* python3 runWorkflow --s1Conf
-* python3 runWorkflow --s2Crab
-* python3 runWorkflow --s3Ntuple 
-* python3 runWorkflow --s4Flat
-* python3 runWorkflow --s5Reg 
-* python3 runWorkflow --s6Plot 
-* python3 runWorkflow --s7NewGT
