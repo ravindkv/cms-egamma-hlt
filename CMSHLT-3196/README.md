@@ -37,3 +37,8 @@ Effect of SiStripClusterChargeCut
 * cd tmpSub
 * condor_submit submitJobs.jdl
 
+## Merge the historgams and make plot
+* hadd -f hist.root crabPath/histSTAR.root
+* hadd -f hist_CCC.root crabPath_CCC/histSTAR.root
+* cd plot
+* python plotHist.py 
